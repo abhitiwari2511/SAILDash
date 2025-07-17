@@ -1,0 +1,73 @@
+# Ignore Visual Studio temporary files, build results, and user-specific files
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+*.log
+*.tmp
+# NuGet packages
+packages/
+# Web publish folder
+publish/
+# IIS Express folder
+.ionide/
+# Rider project files
+.idea/
+# Local database files
+*.mdf
+*.ldf
+# Others
+*.dbmdl
+*.dbproj.schemaview
+*.pdb
+*.cache
+*.bak
+*.backup
+*.swp
+*.swn
+*.swo
+*.DS_Store
+Thumbs.db
+# App_Data (optional, keep if you have seed data/scripts)
+SAILDashboard/App_Data/*.mdf
+SAILDashboard/App_Data/*.ldf
+# SAILDashboard specific ignores
+SAILDashboard/bin/
+SAILDashboard/obj/
+SAILDashboard/*.user
+SAILDashboard/*.csproj.user
+SAILDashboard/*.suo
+SAILDashboard/*.pdb
+SAILDashboard/*.cache
+SAILDashboard/*.bak
+SAILDashboard/*.backup
+SAILDashboard/*.log
+SAILDashboard/*.tmp
+SAILDashboard/*.dbmdl
+SAILDashboard/*.dbproj.schemaview
+SAILDashboard/*.dll
+SAILDashboard/*.exe
+SAILDashboard/*.vspscc
+SAILDashboard/*.vssscc
+SAILDashboard/*.ncb
+SAILDashboard/*.sdf
+SAILDashboard/*.opensdf
+SAILDashboard/*.sln.docstates
+SAILDashboard/*.suo
+SAILDashboard/*.userosscache
+SAILDashboard/*.sln.docstates
+SAILDashboard/*.dbmdl
+SAILDashboard/*.dbproj.schemaview
+SAILDashboard/*.swp
+SAILDashboard/*.swn
+SAILDashboard/*.swo
+SAILDashboard/*.DS_Store
+SAILDashboard/Thumbs.db
+SAILDashboard/*.designer.cs
+SAILDashboard/obj/
+SAILDashboard/bin/
+SAILDashboard/*.vs/
