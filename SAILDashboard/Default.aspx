@@ -1,4 +1,4 @@
-﻿<%--<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs"--%>
+﻿    <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs"
 Inherits="SAILDashboard._Default" %>
 <!DOCTYPE html>
 <html>

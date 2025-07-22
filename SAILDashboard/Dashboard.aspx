@@ -138,10 +138,98 @@ Inherits="SAILDashboard.Dashboard" %>
         padding: 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+      }
+
+      .chart-wrapper:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .pie-chart-small {
+        min-height: 250px;
+      }
+
+      .pie-chart-small canvas {
+        max-height: 200px !important;
       }
 
       body.dark-mode .chart-wrapper {
         background: #2a2a3b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      body.dark-mode .chart-wrapper:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Layout Control */
+      .bar-charts-layout {
+        display: block;
+      }
+
+      .pie-charts-layout {
+        display: none;
+      }
+
+      /* Modal Qualification Breakdown Styles */
+      .qualification-breakdown-panel {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        border: 1px solid #dee2e6;
+      }
+
+      .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .breakdown-item:last-child {
+        border-bottom: none;
+      }
+
+      .breakdown-label {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .breakdown-value {
+        font-weight: 600;
+        color: #007bff;
+      }
+
+      .breakdown-total {
+        text-align: center;
+        padding: 15px 0 5px 0;
+        font-size: 1.1em;
+        color: #28a745;
+      }
+
+      body.dark-mode .qualification-breakdown-panel {
+        background: #343a40;
+        border-color: #495057;
+      }
+
+      body.dark-mode .breakdown-item {
+        border-bottom-color: #495057;
+      }
+
+      body.dark-mode .breakdown-label {
+        color: #adb5bd;
+      }
+
+      body.dark-mode .breakdown-value {
+        color: #17a2b8;
+      }
+
+      body.dark-mode .breakdown-total {
+        color: #28a745;
       }
     </style>
   </head>
@@ -246,51 +334,104 @@ Inherits="SAILDashboard.Dashboard" %>
           ></canvas>
 
           <!-- Charts for both SAIL and individual plants -->
-          <div class="row mb-4">
-            <div class="col-md-6">
-              <div
-                class="chart-wrapper"
-                onclick="openChartModal('functionBarChart', 'Function-wise Manpower Distribution')"
-              >
-                <canvas
-                  id="functionBarChart"
-                  style="min-height: 300px; width: 100%; cursor: pointer"
-                ></canvas>
+          <!-- Bar charts layout (for SAIL view) -->
+          <div class="bar-charts-layout">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div
+                  class="chart-wrapper"
+                  onclick="openChartModal('functionBarChart', 'Function-wise Manpower Distribution')"
+                >
+                  <canvas
+                    id="functionBarChart"
+                    style="min-height: 300px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div
+                  class="chart-wrapper"
+                  onclick="openChartModal('cadreBarChart', 'Cadre-wise Manpower Distribution')"
+                >
+                  <canvas
+                    id="cadreBarChart"
+                    style="min-height: 300px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <div
-                class="chart-wrapper"
-                onclick="openChartModal('cadreBarChart', 'Cadre-wise Manpower Distribution')"
-              >
-                <canvas
-                  id="cadreBarChart"
-                  style="min-height: 300px; width: 100%; cursor: pointer"
-                ></canvas>
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div
+                  class="chart-wrapper"
+                  onclick="openChartModal('genderBarChart', 'Gender-wise Manpower Distribution')"
+                >
+                  <canvas
+                    id="genderBarChart"
+                    style="min-height: 300px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div
+                  class="chart-wrapper"
+                  onclick="openChartModal('totalBarChart', 'Total Manpower Distribution')"
+                >
+                  <canvas
+                    id="totalBarChart"
+                    style="min-height: 300px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
               </div>
             </div>
           </div>
-          <div class="row mb-4">
-            <div class="col-md-6">
-              <div
-                class="chart-wrapper"
-                onclick="openChartModal('genderBarChart', 'Gender-wise Manpower Distribution')"
-              >
-                <canvas
-                  id="genderBarChart"
-                  style="min-height: 300px; width: 100%; cursor: pointer"
-                ></canvas>
+
+          <!-- Pie charts layout (for individual plant view) -->
+          <div class="pie-charts-layout">
+            <div class="row mb-4">
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('functionPieChart', 'Function-wise Distribution')"
+                >
+                  <canvas
+                    id="functionPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
               </div>
-            </div>
-            <div class="col-md-6">
-              <div
-                class="chart-wrapper"
-                onclick="openChartModal('totalBarChart', 'Total Manpower Distribution')"
-              >
-                <canvas
-                  id="totalBarChart"
-                  style="min-height: 300px; width: 100%; cursor: pointer"
-                ></canvas>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('cadrePieChart', 'Cadre-wise Distribution')"
+                >
+                  <canvas
+                    id="cadrePieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('genderPieChart', 'Gender-wise Distribution')"
+                >
+                  <canvas
+                    id="genderPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('totalPieChart', 'Qualification-wise Distribution')"
+                >
+                  <canvas
+                    id="totalPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -317,10 +458,59 @@ Inherits="SAILDashboard.Dashboard" %>
               ></button>
             </div>
             <div class="modal-body">
-              <canvas
-                id="modalChart"
-                style="width: 100%; height: 500px"
-              ></canvas>
+              <div class="row">
+                <div class="col-12" id="modalChartContainer">
+                  <canvas
+                    id="modalChart"
+                    style="width: 100%; height: 500px"
+                  ></canvas>
+                </div>
+                <div
+                  class="col-md-4"
+                  id="qualificationBreakdown"
+                  style="display: none"
+                >
+                  <div class="qualification-breakdown-panel">
+                    <h6 class="mb-3">
+                      <i class="fas fa-info-circle"></i> Others Category
+                      Includes:
+                    </h6>
+                    <div class="breakdown-item">
+                      <span class="breakdown-label">
+                        <i class="fas fa-square text-info"></i> Higher
+                        Secondary:
+                      </span>
+                      <span class="breakdown-value" id="higherSecondaryValue"
+                        >N/A</span
+                      >
+                    </div>
+                    <div class="breakdown-item">
+                      <span class="breakdown-label">
+                        <i class="fas fa-square text-info"></i> Matriculate:
+                      </span>
+                      <span class="breakdown-value" id="matriculateValue"
+                        >N/A</span
+                      >
+                    </div>
+                    <div class="breakdown-item">
+                      <span class="breakdown-label">
+                        <i class="fas fa-square text-info"></i> Below
+                        Matriculate:
+                      </span>
+                      <span class="breakdown-value" id="belowMatriculateValue"
+                        >N/A</span
+                      >
+                    </div>
+                    <hr />
+                    <div class="breakdown-total">
+                      <strong>
+                        <i class="fas fa-calculator"></i> Total Others:
+                        <span id="totalOthersValue">N/A</span>
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -352,19 +542,48 @@ Inherits="SAILDashboard.Dashboard" %>
         document.getElementById("chartModal").addEventListener(
           "shown.bs.modal",
           function () {
-            createModalChart(sourceChart);
+            createModalChart(sourceChart, chartId, title);
           },
           { once: true }
         );
       }
 
-      function createModalChart(sourceChart) {
+      function createModalChart(sourceChart, chartId, title) {
         const modalCanvas = document.getElementById("modalChart");
         const ctx = modalCanvas.getContext("2d");
+        const qualificationBreakdown = document.getElementById(
+          "qualificationBreakdown"
+        );
 
         // Destroy existing modal chart if any
         if (window.modalChartObj) {
           window.modalChartObj.destroy();
+        }
+
+        // Check if this is a qualification chart
+        const isQualificationChart =
+          chartId === "totalBarChart" ||
+          chartId === "totalPieChart" ||
+          title.includes("Qualification");
+
+        // Get the modal chart container
+        const modalChartContainer = document.getElementById(
+          "modalChartContainer"
+        );
+
+        // Show/hide breakdown panel based on chart type and adjust layout
+        if (
+          isQualificationChart &&
+          sourceChart.data.labels.includes("Others")
+        ) {
+          qualificationBreakdown.style.display = "block";
+          // Adjust chart container to make room for breakdown panel
+          modalChartContainer.className = "col-md-8";
+          populateModalBreakdown(sourceChart);
+        } else {
+          qualificationBreakdown.style.display = "none";
+          // Chart takes full width when no breakdown panel
+          modalChartContainer.className = "col-12";
         }
 
         // Clone the chart configuration
@@ -387,6 +606,32 @@ Inherits="SAILDashboard.Dashboard" %>
 
         // Create new chart in modal
         window.modalChartObj = new Chart(ctx, config);
+      }
+
+      function populateModalBreakdown(sourceChart) {
+        // Use stored breakdown data if available
+        if (window.qualificationBreakdownData) {
+          const data = window.qualificationBreakdownData;
+          document.getElementById("higherSecondaryValue").textContent =
+            data.higherSecondary || 0;
+          document.getElementById("matriculateValue").textContent =
+            data.matriculate || 0;
+          document.getElementById("belowMatriculateValue").textContent =
+            data.belowMatriculate || 0;
+          document.getElementById("totalOthersValue").textContent =
+            data.totalOthers || 0;
+        } else {
+          // Fallback to N/A if no breakdown data
+          document.getElementById("higherSecondaryValue").textContent = "N/A";
+          document.getElementById("matriculateValue").textContent = "N/A";
+          document.getElementById("belowMatriculateValue").textContent = "N/A";
+          document.getElementById("totalOthersValue").textContent = "N/A";
+        }
+      }
+
+      // Function to store qualification breakdown data from backend
+      function storeQualificationBreakdownData(breakdownData) {
+        window.qualificationBreakdownData = breakdownData;
       }
 
       // Clean up modal chart when modal is hidden

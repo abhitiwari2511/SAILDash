@@ -85,97 +85,252 @@ namespace SAILDashboard
                 string totalData = GetSAILTotalManpowerBarChartData(yearForCharts);
                 chartScript = $@"
 <script>
-function renderBarChart(canvasId, chartData, title) {{
+// Show bar chart layout and hide pie chart layout
+document.addEventListener('DOMContentLoaded', function() {{
+    const barLayout = document.querySelector('.bar-charts-layout');
+    const pieLayout = document.querySelector('.pie-charts-layout');
+    if (barLayout) barLayout.style.setProperty('display', 'block', 'important');
+    if (pieLayout) pieLayout.style.setProperty('display', 'none', 'important');
+    
+    // Render bar charts after layout is visible with specific configurations
+    setTimeout(function() {{
+        renderFunctionBarChart('functionBarChart', {functionData}, 'Function-wise Manpower Distribution');
+        renderCadreBarChart('cadreBarChart', {cadreData}, 'Cadre-wise Manpower Distribution');
+        renderGenderBarChart('genderBarChart', {genderData}, 'Gender-wise Manpower Distribution');
+        renderTotalBarChart('totalBarChart', {totalData}, 'Total Manpower Distribution');
+    }}, 100);
+}});
+
+// Function-wise chart with appropriate scale (0-12000)
+function renderFunctionBarChart(canvasId, chartData, title) {{
   var ctx = document.getElementById(canvasId).getContext('2d');
   if (window[canvasId + 'Obj']) window[canvasId + 'Obj'].destroy();
   
-  // Calculate max and min values for better scaling
-  var maxValue = 0;
-  var minValue = Number.MAX_VALUE;
-  var hasSmallValues = false;
+  var yAxisConfig = {{
+    beginAtZero: true,
+    max: 12000,
+    ticks: {{
+      callback: function(value) {{
+        return value.toLocaleString();
+      }},
+      stepSize: 1000,
+      maxTicksLimit: 13
+    }}
+  }};
   
-  chartData.datasets.forEach(function(dataset) {{
-    dataset.data.forEach(function(value) {{
-      if (value > 0) {{
-        if (value > maxValue) maxValue = value;
-        if (value < minValue) minValue = value;
-        if (value < maxValue * 0.1 && value > 0) hasSmallValues = true;
-      }}
-    }});
-  }});
+  window[canvasId + 'Obj'] = createBarChart(ctx, chartData, title, yAxisConfig);
+}}
+
+// Cadre-wise chart with appropriate scale (0-12000)
+function renderCadreBarChart(canvasId, chartData, title) {{
+  var ctx = document.getElementById(canvasId).getContext('2d');
+  if (window[canvasId + 'Obj']) window[canvasId + 'Obj'].destroy();
   
-  // Adjust scale to make small values visible
-  var yAxisConfig;
-  if (hasSmallValues && maxValue > 1000) {{
-    // Use logarithmic scale for charts with both large and small values
-    yAxisConfig = {{
-      type: 'logarithmic',
-      beginAtZero: false,
-      min: Math.max(1, minValue * 0.5),
-      ticks: {{
-        callback: function(value) {{
-          if (value === 0) return '0';
-          if (value < 1000) return value.toLocaleString();
-          return (value / 1000).toFixed(1) + 'K';
-        }},
-        maxTicksLimit: 8
-      }}
-    }};
-  }} else {{
-    // Use linear scale with adjusted range
-    var stepSize = 50;
-    if (maxValue > 5000) stepSize = 500;
-    else if (maxValue > 2000) stepSize = 200;
-    else if (maxValue > 1000) stepSize = 100;
-    else if (maxValue > 500) stepSize = 50;
-    else if (maxValue > 100) stepSize = 25;
-    else stepSize = 10;
-    
-    yAxisConfig = {{
-      beginAtZero: true,
-      suggestedMax: Math.max(maxValue * 1.2, 100),
-      ticks: {{
-        callback: function(value) {{
-          if (value < 1000) return value.toLocaleString();
-          return (value / 1000).toFixed(1) + 'K';
-        }},
-        stepSize: stepSize,
-        maxTicksLimit: 10
-      }}
-    }};
-  }}
+  var yAxisConfig = {{
+    beginAtZero: true,
+    max: 12000,
+    ticks: {{
+      callback: function(value) {{
+        return value.toLocaleString();
+      }},
+      stepSize: 1000,
+      maxTicksLimit: 13
+    }}
+  }};
   
-  window[canvasId + 'Obj'] = new Chart(ctx, {{
+  window[canvasId + 'Obj'] = createBarChart(ctx, chartData, title, yAxisConfig);
+}}
+
+// Gender-wise chart with appropriate scale (0-15000)
+function renderGenderBarChart(canvasId, chartData, title) {{
+  var ctx = document.getElementById(canvasId).getContext('2d');
+  if (window[canvasId + 'Obj']) window[canvasId + 'Obj'].destroy();
+  
+  var yAxisConfig = {{
+    beginAtZero: true,
+    max: 15000,
+    ticks: {{
+      callback: function(value) {{
+        return value.toLocaleString();
+      }},
+      stepSize: 2000,
+      maxTicksLimit: 8
+    }}
+  }};
+  
+  window[canvasId + 'Obj'] = createBarChart(ctx, chartData, title, yAxisConfig);
+}}
+
+// Total manpower chart with appropriate scale (0-15000)
+function renderTotalBarChart(canvasId, chartData, title) {{
+  var ctx = document.getElementById(canvasId).getContext('2d');
+  if (window[canvasId + 'Obj']) window[canvasId + 'Obj'].destroy();
+  
+  var yAxisConfig = {{
+    beginAtZero: true,
+    max: 15000,
+    ticks: {{
+      callback: function(value) {{
+        return value.toLocaleString();
+      }},
+      stepSize: 1000,
+      maxTicksLimit: 16
+    }}
+  }};
+  
+  window[canvasId + 'Obj'] = createBarChart(ctx, chartData, title, yAxisConfig);
+}}
+
+// Common chart creation function
+function createBarChart(ctx, chartData, title, yAxisConfig) {{
+  
+  return new Chart(ctx, {{
     type: 'bar',
     data: chartData,
     options: {{
       responsive: true,
+      maintainAspectRatio: false,
+      interaction: {{
+        intersect: false,
+        mode: 'nearest',
+        axis: 'x'
+      }},
+      hover: {{
+        mode: 'nearest',
+        intersect: false,
+        animationDuration: 200
+      }},
+      onHover: function(event, activeElements) {{
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      }},
       plugins: {{ 
-        legend: {{ display: true }},
-        title: {{ display: true, text: title }},
-        tooltip: {{
-          callbacks: {{
-            label: function(context) {{
-              return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
-            }}
+        legend: {{ 
+          display: true,
+          position: 'top',
+          align: 'center',
+          labels: {{
+            padding: 20,
+            usePointStyle: true
           }}
+        }},
+        title: {{ 
+          display: true, 
+          text: title,
+          padding: {{
+            top: 10,
+            bottom: 20
+          }},
+          font: {{ 
+            size: 16,
+            weight: 'bold'
+          }}
+        }},
+        tooltip: {{
+          enabled: true,
+          mode: 'nearest',
+          intersect: false,
+          position: 'average',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: 'white',
+          bodyColor: 'white',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          borderWidth: 1,
+          cornerRadius: 6,
+          displayColors: true,
+          callbacks: {{
+            title: function(context) {{
+              // Show full unit name in tooltip title
+              return 'Unit: ' + context[0].label;
+            }},
+            label: function(context) {{
+              const value = context.parsed.y;
+              const formattedValue = value.toLocaleString();
+              return context.dataset.label + ': ' + formattedValue;
+            }},
+            afterLabel: function(context) {{
+              // Calculate percentage if multiple datasets
+              if (context.chart.data.datasets.length > 1) {{
+                const datasetArray = context.chart.data.datasets.map(dataset => dataset.data[context.dataIndex]);
+                const total = datasetArray.reduce((acc, val) => acc + val, 0);
+                const percentage = ((context.parsed.y / total) * 100).toFixed(1);
+                return 'Percentage: ' + percentage + '%';
+              }}
+              return '';
+            }}
+          }},
+          titleFont: {{
+            size: 14,
+            weight: 'bold'
+          }},
+          bodyFont: {{
+            size: 12
+          }},
+          padding: 12,
+          caretPadding: 6
         }}
       }},
       scales: {{
+        x: {{
+          grid: {{
+            display: false
+          }},
+          ticks: {{
+            font: {{
+              size: 10
+            }},
+            maxRotation: 0,
+            minRotation: 0,
+            padding: 5,
+            align: 'center',
+            textAlign: 'center',
+            callback: function(value, index, values) {{
+              const label = this.getLabelForValue(value);
+              // For labels longer than 6 characters, truncate with ellipsis
+              if (label && label.length > 6) {{
+                return label.substring(0, 5) + '...';
+              }}
+              return label;
+            }}
+          }},
+          title: {{
+            display: false
+          }},
+          offset: true,
+          afterFit: function(scale) {{
+            // Ensure enough space for straight labels
+            scale.height = Math.max(scale.height, 50);
+          }}
+        }},
         y: yAxisConfig
       }},
       elements: {{
         bar: {{
-          maxBarThickness: 60
+          maxBarThickness: 45,
+          borderSkipped: false,
+          hoverBackgroundColor: function(context) {{
+            const colors = context.chart.data.datasets[context.datasetIndex].backgroundColor;
+            if (Array.isArray(colors)) {{
+              return colors[context.dataIndex];
+            }}
+            return colors;
+          }},
+          hoverBorderColor: '#333',
+          hoverBorderWidth: 2
         }}
-      }}
+      }},
+      layout: {{
+        padding: {{
+          top: 10,
+          bottom: 25,
+          left: 10,
+          right: 10
+        }}
+      }},
+      categoryPercentage: 0.8,
+      barPercentage: 0.9
     }}
   }});
 }}
-renderBarChart('functionBarChart', {functionData}, 'Function-wise Manpower Distribution');
-renderBarChart('cadreBarChart', {cadreData}, 'Cadre-wise Manpower Distribution');
-renderBarChart('genderBarChart', {genderData}, 'Gender-wise Manpower Distribution');
-renderBarChart('totalBarChart', {totalData}, 'Total Manpower Distribution');
 </script>";
             }
             else // Individual plants: Show 4 pie charts
@@ -185,27 +340,125 @@ renderBarChart('totalBarChart', {totalData}, 'Total Manpower Distribution');
                 string cadreData = GetSinglePlantCadreWisePieData(unitCd, yearForCharts);
                 string genderData = GetSinglePlantGenderWisePieData(unitCd, yearForCharts);
                 string departmentData = GetSinglePlantDepartmentWisePieData(unitCd, yearForCharts);
+                string qualificationBreakdownData = GetQualificationBreakdownDataString(unitCd, yearForCharts);
 
                 chartScript = $@"
 <script>
-function renderPieChart(canvasId, chartData, title) {{
-  var ctx = document.getElementById(canvasId).getContext('2d');
-  if (window[canvasId + 'Obj']) window[canvasId + 'Obj'].destroy();
+document.addEventListener('DOMContentLoaded', function() {{
+    // Show pie chart layout and hide bar chart layout
+    const barLayout = document.querySelector('.bar-charts-layout');
+    const pieLayout = document.querySelector('.pie-charts-layout');
+    if (barLayout) barLayout.style.setProperty('display', 'none', 'important');
+    if (pieLayout) pieLayout.style.setProperty('display', 'block', 'important');
+    
+    // Force immediate layout refresh
+    if (pieLayout) {{
+        pieLayout.offsetHeight; // Trigger reflow
+    }}
+    
+    // Wait for layout to be fully visible, then render charts
+    setTimeout(function() {{
+        // Destroy any existing charts first
+        ['functionPieChart', 'cadrePieChart', 'genderPieChart', 'totalPieChart'].forEach(function(canvasId) {{
+            if (window[canvasId + 'Obj']) {{
+                window[canvasId + 'Obj'].destroy();
+                window[canvasId + 'Obj'] = null;
+            }}
+        }});
+        
+        // Double-check that pie layout is visible before rendering
+        const pieLayoutCheck = document.querySelector('.pie-charts-layout');
+        if (pieLayoutCheck && pieLayoutCheck.style.display !== 'none') {{
+            // Render pie charts with additional delay
+            setTimeout(function() {{
+                console.log('Rendering pie charts...');
+                renderPieChart('functionPieChart', {functionData}, 'Function-wise');
+                renderPieChart('cadrePieChart', {cadreData}, 'Cadre-wise');
+                renderPieChart('genderPieChart', {genderData}, 'Gender-wise');
+                renderPieChart('totalPieChart', {departmentData}, 'Qualification-wise');
+                
+                // Store qualification breakdown data for the breakdown panel
+                storeQualificationBreakdownData({qualificationBreakdownData});
+            }}, 200);
+        }} else {{
+            console.error('Pie chart layout is not visible!');
+        }}
+    }}, 500);
+}});
+
+function renderPieChart(canvasId, chartData, title, retryCount) {{
+  retryCount = retryCount || 0;
+  console.log('Attempting to render chart:', canvasId, 'retry:', retryCount);
   
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) {{
+    console.error('Canvas not found: ' + canvasId);
+    return;
+  }}
+  
+  // Check if canvas is visible
+  var rect = canvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {{
+    if (retryCount < 10) {{ // Limit retries to 10 attempts
+      console.warn('Canvas is not visible:', canvasId, rect, 'retrying...', retryCount + 1);
+      // Try again after a short delay
+      setTimeout(function() {{
+        renderPieChart(canvasId, chartData, title, retryCount + 1);
+      }}, 300);
+      return;
+    }} else {{
+      console.error('Failed to render chart after 10 retries - canvas still not visible:', canvasId, rect);
+      return;
+    }}
+  }}
+  
+  var ctx = canvas.getContext('2d');
+  if (window[canvasId + 'Obj']) {{
+    window[canvasId + 'Obj'].destroy();
+    window[canvasId + 'Obj'] = null;
+  }}
+  
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  console.log('Creating pie chart for:', canvasId);
   window[canvasId + 'Obj'] = new Chart(ctx, {{
     type: 'pie',
     data: chartData,
     options: {{
       responsive: true,
+      maintainAspectRatio: false,
+      animation: {{
+        duration: 1000,
+        onComplete: function() {{
+          console.log('Animation complete for:', canvasId);
+        }}
+      }},
       plugins: {{ 
         legend: {{ 
           display: true,
-          position: 'bottom'
+          position: 'bottom',
+          align: 'center',
+          labels: {{
+            padding: 8,
+            usePointStyle: true,
+            font: {{
+              size: 10
+            }},
+            boxWidth: 12
+          }}
         }},
         title: {{ 
           display: true, 
           text: title,
-          font: {{ size: 16 }}
+          font: {{ 
+            size: 14,
+            weight: 'bold'
+          }},
+          padding: {{
+            top: 5,
+            bottom: 10
+          }}
         }},
         tooltip: {{
           callbacks: {{
@@ -216,15 +469,27 @@ function renderPieChart(canvasId, chartData, title) {{
             }}
           }}
         }}
+      }},
+      layout: {{
+        padding: {{
+          top: 5,
+          bottom: 5,
+          left: 5,
+          right: 5
+        }}
       }}
     }}
   }});
+  
+  // Force chart resize and update to ensure proper display
+  setTimeout(function() {{
+    if (window[canvasId + 'Obj']) {{
+      window[canvasId + 'Obj'].resize();
+      window[canvasId + 'Obj'].update('active');
+      console.log('Chart resized and updated:', canvasId);
+    }}
+  }}, 300);
 }}
-
-renderPieChart('functionBarChart', {functionData}, 'Function-wise Distribution');
-renderPieChart('cadreBarChart', {cadreData}, 'Cadre-wise Distribution');
-renderPieChart('genderBarChart', {genderData}, 'Gender-wise Distribution');
-renderPieChart('totalBarChart', {departmentData}, 'Qualification-wise Distribution');
 </script>";
             }
         }
@@ -234,6 +499,53 @@ renderPieChart('totalBarChart', {departmentData}, 'Qualification-wise Distributi
         #endregion
 
         #region Private Methods
+
+        // Get dynamic cadre ratio from actual SAIL data using cadre column
+        private (double executiveRatio, double nonExecutiveRatio) GetDynamicCadreRatio(string year = "2024")
+        {
+            try
+            {
+                OpenConnection();
+
+                // Get actual executives count from cadre column
+                command.CommandText = @"
+                    SELECT SUM(manpower_count) 
+                    FROM manpower_data 
+                    WHERE unit_cd >= 0 AND SUBSTR(year_date, 7, 4) = :year AND UPPER(cadre) = 'EXECUTIVE'";
+                command.Parameters.Clear();
+                command.Parameters.Add(new OracleParameter("year", year));
+                object execResult = command.ExecuteScalar();
+                int totalExec = execResult != DBNull.Value ? Convert.ToInt32(execResult) : 0;
+
+                // Get actual non-executives count from cadre column (handle different formats)
+                command.CommandText = @"
+                    SELECT SUM(manpower_count) 
+                    FROM manpower_data 
+                    WHERE unit_cd >= 0 AND SUBSTR(year_date, 7, 4) = :year AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
+                command.Parameters.Clear();
+                command.Parameters.Add(new OracleParameter("year", year));
+                object nonExecResult = command.ExecuteScalar();
+                int totalNonExec = nonExecResult != DBNull.Value ? Convert.ToInt32(nonExecResult) : 0;
+
+                CloseConnection();
+
+                int total = totalExec + totalNonExec;
+                if (total > 0)
+                {
+                    double execRatio = (double)totalExec / total;
+                    double nonExecRatio = (double)totalNonExec / total;
+                    return (execRatio, nonExecRatio);
+                }
+            }
+            catch
+            {
+                // Fallback to known SAIL ratio if database query fails
+            }
+
+            // Default fallback: Use actual SAIL ratio (140 executives, 438 non-executives = 578 total)
+            return (140.0 / 578.0, 438.0 / 578.0); // 24.2% executives, 75.8% non-executives
+        }
+
         private void InitializePage()
         {
             LoadPlants();
@@ -712,18 +1024,21 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
                     int exec = 0, nonExec = 0;
                     try
                     {
-                        // Use manpower_count data with proportional split
-                        command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
+                        // Get executives count using cadre column
+                        command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND UPPER(cadre) = 'EXECUTIVE'";
                         command.Parameters.Clear();
                         command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
                         command.Parameters.Add(new OracleParameter("year", year));
-                        object result = command.ExecuteScalar();
-                        int total = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                        object execResult = command.ExecuteScalar();
+                        exec = execResult != DBNull.Value ? Convert.ToInt32(execResult) : 0;
 
-                        // Calculate proportional split that ensures total adds up correctly
-                        // Assuming approximately 30% executives and 70% non-executives
-                        exec = (int)Math.Round(total * 0.3);
-                        nonExec = total - exec; // Ensure exact total
+                        // Get non-executives count using cadre column (handle different formats)
+                        command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
+                        command.Parameters.Clear();
+                        command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
+                        command.Parameters.Add(new OracleParameter("year", year));
+                        object nonExecResult = command.ExecuteScalar();
+                        nonExec = nonExecResult != DBNull.Value ? Convert.ToInt32(nonExecResult) : 0;
                     }
                     catch
                     {
@@ -774,25 +1089,33 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
                 {
                     labels.Add(unit.UnitAbb);
 
-                    // Get 2023 data
-                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2023'";
+                    // Get 2023 executives data using cadre column
+                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2023' AND UPPER(cadre) = 'EXECUTIVE'";
                     command.Parameters.Clear();
                     command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
-                    object result2023 = command.ExecuteScalar();
-                    int total2023 = result2023 != DBNull.Value ? Convert.ToInt32(result2023) : 0;
+                    object exec2023Result = command.ExecuteScalar();
+                    int exec23 = exec2023Result != DBNull.Value ? Convert.ToInt32(exec2023Result) : 0;
 
-                    // Get 2024 data
-                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2024'";
+                    // Get 2023 non-executives data using cadre column (handle different formats)
+                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2023' AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
                     command.Parameters.Clear();
                     command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
-                    object result2024 = command.ExecuteScalar();
-                    int total2024 = result2024 != DBNull.Value ? Convert.ToInt32(result2024) : 0;
+                    object nonExec2023Result = command.ExecuteScalar();
+                    int nonExec23 = nonExec2023Result != DBNull.Value ? Convert.ToInt32(nonExec2023Result) : 0;
 
-                    // Calculate proportional split that ensures totals add up correctly
-                    int exec23 = (int)Math.Round(total2023 * 0.3);
-                    int nonExec23 = total2023 - exec23;
-                    int exec24 = (int)Math.Round(total2024 * 0.3);
-                    int nonExec24 = total2024 - exec24;
+                    // Get 2024 executives data using cadre column
+                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2024' AND UPPER(cadre) = 'EXECUTIVE'";
+                    command.Parameters.Clear();
+                    command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
+                    object exec2024Result = command.ExecuteScalar();
+                    int exec24 = exec2024Result != DBNull.Value ? Convert.ToInt32(exec2024Result) : 0;
+
+                    // Get 2024 non-executives data using cadre column (handle different formats)
+                    command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = '2024' AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
+                    command.Parameters.Clear();
+                    command.Parameters.Add(new OracleParameter("unitCd", unit.UnitCd));
+                    object nonExec2024Result = command.ExecuteScalar();
+                    int nonExec24 = nonExec2024Result != DBNull.Value ? Convert.ToInt32(nonExec2024Result) : 0;
 
                     executives2023.Add(exec23);
                     nonExecutives2023.Add(nonExec23);
@@ -823,9 +1146,7 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
                 }
             };
             return new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(chartObj);
-        }
-
-        // --- NEW: Gender-wise Bar Chart Data for SAIL (Single Year) ---
+        }        // --- NEW: Gender-wise Bar Chart Data for SAIL (Single Year) ---
         private string GetSAILGenderWiseBarChartData(string year)
         {
             var units = GetAllUnitsExceptSAIL();
@@ -1119,49 +1440,23 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
             try
             {
                 OpenConnection();
-                // First try to get actual cadre data from executives and non_executives columns
-                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
+
+                // Get executives count using cadre column
+                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND UPPER(cadre) = 'EXECUTIVE'";
                 command.Parameters.Clear();
                 command.Parameters.Add(new OracleParameter("unitCd", unitCd));
                 command.Parameters.Add(new OracleParameter("year", year));
-                reader = command.ExecuteReader();
-                if (reader.Read() && !reader.IsDBNull(0) && !reader.IsDBNull(1))
-                {
-                    executives = Convert.ToInt32(reader.GetValue(0));
-                    nonExecutives = Convert.ToInt32(reader.GetValue(1));
-                }
-                else
-                {
-                    // If specific cadre columns don't exist, try alternative column names
-                    reader.Close();
-                    command.CommandText = "SELECT SUM(executive), SUM(non_executive) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
-                    command.Parameters.Clear();
-                    command.Parameters.Add(new OracleParameter("unitCd", unitCd));
-                    command.Parameters.Add(new OracleParameter("year", year));
-                    reader = command.ExecuteReader();
-                    if (reader.Read() && !reader.IsDBNull(0) && !reader.IsDBNull(1))
-                    {
-                        executives = Convert.ToInt32(reader.GetValue(0));
-                        nonExecutives = Convert.ToInt32(reader.GetValue(1));
-                    }
-                    else
-                    {
-                        // Last fallback: use manpower_count with proportional split
-                        reader.Close();
-                        command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
-                        command.Parameters.Clear();
-                        command.Parameters.Add(new OracleParameter("unitCd", unitCd));
-                        command.Parameters.Add(new OracleParameter("year", year));
-                        object result = command.ExecuteScalar();
-                        int total = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                object execResult = command.ExecuteScalar();
+                executives = execResult != DBNull.Value ? Convert.ToInt32(execResult) : 0;
 
-                        // Calculate proportional split that ensures total adds up correctly
-                        executives = (int)Math.Round(total * 0.3);
-                        nonExecutives = total - executives; // Ensure exact total
-                    }
-                }
-                if (reader != null && !reader.IsClosed)
-                    reader.Close();
+                // Get non-executives count using cadre column (handle different formats)
+                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
+                command.Parameters.Clear();
+                command.Parameters.Add(new OracleParameter("unitCd", unitCd));
+                command.Parameters.Add(new OracleParameter("year", year));
+                object nonExecResult = command.ExecuteScalar();
+                nonExecutives = nonExecResult != DBNull.Value ? Convert.ToInt32(nonExecResult) : 0;
+
                 CloseConnection();
             }
             catch { }
@@ -1325,22 +1620,27 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
             try
             {
                 OpenConnection();
-                // Use manpower_count data with proportional split
-                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
+
+                // Get executives count using cadre column
+                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND UPPER(cadre) = 'EXECUTIVE'";
                 command.Parameters.Clear();
                 command.Parameters.Add(new OracleParameter("unitCd", unitCd));
                 command.Parameters.Add(new OracleParameter("year", year));
-                object result = command.ExecuteScalar();
-                int total = result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                object execResult = command.ExecuteScalar();
+                executives = execResult != DBNull.Value ? Convert.ToInt32(execResult) : 0;
 
-                // Calculate proportional split that ensures total adds up correctly
-                // Assuming approximately 30% executives and 70% non-executives
-                executives = (int)Math.Round(total * 0.3);
-                nonExecutives = total - executives; // Ensure exact total
+                // Get non-executives count using cadre column (handle different formats)
+                command.CommandText = "SELECT SUM(manpower_count) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year AND (UPPER(cadre) = 'NON EXECUTIVE' OR UPPER(cadre) = 'NON-EXECUTIVE' OR UPPER(cadre) = 'NONEXECUTIVE')";
+                command.Parameters.Clear();
+                command.Parameters.Add(new OracleParameter("unitCd", unitCd));
+                command.Parameters.Add(new OracleParameter("year", year));
+                object nonExecResult = command.ExecuteScalar();
+                nonExecutives = nonExecResult != DBNull.Value ? Convert.ToInt32(nonExecResult) : 0;
 
                 CloseConnection();
             }
             catch { }
+
             var chartObj = new
             {
                 labels = new[] { "Executives", "Non-Executives" },
@@ -1453,6 +1753,54 @@ renderBarChart('totalBarChart', {yearlyData}, 'Yearly Manpower Comparison (2023 
                 }
             };
             return new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(chartObj);
+        }
+
+        // Get detailed qualification breakdown data for the breakdown panel
+        private string GetQualificationBreakdownDataString(int unitCd, string year)
+        {
+            var postGraduation = 0;
+            var graduation = 0;
+            var diploma = 0;
+            var iti = 0;
+            var higherSecondary = 0;
+            var matriculate = 0;
+            var belowMatriculate = 0;
+
+            try
+            {
+                OpenConnection();
+                command.CommandText = "SELECT SUM(post_graduation), SUM(graduation), SUM(diploma), SUM(iti), SUM(higher_secondary), SUM(matriculate), SUM(below_matriculate) FROM manpower_data WHERE unit_cd = :unitCd AND SUBSTR(year_date, 7, 4) = :year";
+                command.Parameters.Clear();
+                command.Parameters.Add(new OracleParameter("unitCd", unitCd));
+                command.Parameters.Add(new OracleParameter("year", year));
+                reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    postGraduation = reader.IsDBNull(0) ? 0 : Convert.ToInt32(reader.GetValue(0));
+                    graduation = reader.IsDBNull(1) ? 0 : Convert.ToInt32(reader.GetValue(1));
+                    diploma = reader.IsDBNull(2) ? 0 : Convert.ToInt32(reader.GetValue(2));
+                    iti = reader.IsDBNull(3) ? 0 : Convert.ToInt32(reader.GetValue(3));
+                    higherSecondary = reader.IsDBNull(4) ? 0 : Convert.ToInt32(reader.GetValue(4));
+                    matriculate = reader.IsDBNull(5) ? 0 : Convert.ToInt32(reader.GetValue(5));
+                    belowMatriculate = reader.IsDBNull(6) ? 0 : Convert.ToInt32(reader.GetValue(6));
+                }
+                reader.Close();
+                CloseConnection();
+            }
+            catch { }
+
+            var breakdownObj = new
+            {
+                postGraduation = postGraduation,
+                graduation = graduation,
+                diploma = diploma,
+                iti = iti,
+                higherSecondary = higherSecondary,
+                matriculate = matriculate,
+                belowMatriculate = belowMatriculate,
+                totalOthers = higherSecondary + matriculate + belowMatriculate
+            };
+            return new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(breakdownObj);
         }
         #endregion
     }
