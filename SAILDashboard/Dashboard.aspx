@@ -7,6 +7,7 @@ Inherits="SAILDashboard.Dashboard" %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SAIL HR Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -135,7 +136,7 @@ Inherits="SAILDashboard.Dashboard" %>
       .chart-wrapper {
         background: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 5px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         height: 100%;
         transition: transform 0.2s, box-shadow 0.2s;
@@ -148,11 +149,15 @@ Inherits="SAILDashboard.Dashboard" %>
       }
 
       .pie-chart-small {
-        min-height: 250px;
+        min-height: 200px;
+        margin-bottom: 0;
+        padding-bottom: 0;
       }
 
       .pie-chart-small canvas {
-        max-height: 200px !important;
+        max-height: 180px !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
       }
 
       body.dark-mode .chart-wrapper {
@@ -169,8 +174,77 @@ Inherits="SAILDashboard.Dashboard" %>
         display: block;
       }
 
+      .bar-charts-layout .row {
+        margin-left: -5px;
+        margin-right: -5px;
+      }
+
+      .bar-charts-layout .col-md-6 {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+
+      .bar-charts-layout canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+
+      /* Ensure chart containers use full space */
+      .bar-charts-layout .chart-wrapper {
+        height: 350px !important;
+        margin-bottom: 10px;
+      }
+
       .pie-charts-layout {
         display: none;
+      }
+
+      .pie-charts-layout .row {
+        justify-content: center;
+        align-items: center;
+      }
+
+      .pie-charts-layout .col-md-3 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 5px;
+        padding-bottom: 0;
+      }
+
+      .pie-charts-layout .chart-wrapper {
+        text-align: center;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        padding-bottom: 5px;
+      }
+
+      .sail-pie-charts-layout {
+        display: block;
+      }
+
+      .sail-pie-charts-layout .row {
+        justify-content: center;
+        align-items: center;
+      }
+
+      .sail-pie-charts-layout .col-md-3 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 5px;
+        padding-bottom: 0;
+      }
+
+      .sail-pie-charts-layout .chart-wrapper {
+        text-align: center;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        padding-bottom: 5px;
       }
 
       /* Modal Qualification Breakdown Styles */
@@ -334,6 +408,56 @@ Inherits="SAILDashboard.Dashboard" %>
           ></canvas>
 
           <!-- Charts for both SAIL and individual plants -->
+          <!-- SAIL Summary Pie Charts (above bar charts) -->
+          <div class="sail-pie-charts-layout">
+            <div class="row mb-4">
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('sailFunctionPieChart', 'SAIL Function-wise Summary')"
+                >
+                  <canvas
+                    id="sailFunctionPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('sailCadrePieChart', 'SAIL Cadre-wise Summary')"
+                >
+                  <canvas
+                    id="sailCadrePieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('sailGenderPieChart', 'SAIL Gender-wise Summary')"
+                >
+                  <canvas
+                    id="sailGenderPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div
+                  class="chart-wrapper pie-chart-small"
+                  onclick="openChartModal('sailTotalPieChart', 'SAIL Total Manpower (2023 vs 2024)')"
+                >
+                  <canvas
+                    id="sailTotalPieChart"
+                    style="height: 200px; width: 100%; cursor: pointer"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Bar charts layout (for SAIL view) -->
           <div class="bar-charts-layout">
             <div class="row mb-4">
